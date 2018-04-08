@@ -1,0 +1,18 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TagLibrary"
+        xmlns:Properties="clr-namespace:TagLibrary.Properties" x:Name="TagLibrary" x:Class="TagLibrary.MainWindow"
+        mc:Ignorable="d"
+        Title="TagLibrary" Height="668" Width="1025" Background="#FFFAFAFA">
+    <Grid>
+        <Menu Height="24" VerticalAlignment="Top" Grid.ColumnSpan="2" Background="#FFFAFAFA">
+            <MenuItem x:Name="File" Header="文件" Height="24" Width="80"/>
+            <MenuItem x:Name="Tag" Header="标签" Height="24" Width="80"/>
+            <MenuItem x:Name="Setting" Header="设置" Height="24" Width="80"/>
+            <MenuItem x:Name="About" Header="关于" Height="24" Width="80"/>
+        </Menu>
+    </Grid>
+</Window>
