@@ -13,13 +13,13 @@ namespace Lirui.TagLibray.ExtensionCommon
         /// </summary>
         /// <param name="filename">文件名（绝对路径）</param>
         /// <returns></returns>
-       Task<List<string>> BeginGetTags(string filename);
+       Task<Dictionary<string, string>> BeginGetTags();
 
         /// <summary>
         /// 同步通过文件元数据获取Tag数组
         /// </summary>
         /// <param name="filename">文件名（绝对路径）</param>
         /// <returns></returns>
-        List<string> GetTags(string filename);
+        Dictionary<string, string> GetTags();
     }
 }

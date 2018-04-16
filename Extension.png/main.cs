@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Extension.png {
     public class Png : AbstractExtension {
-        public override List<string> GetTags(string filename) {
+        public override Dictionary<string, string> GetTags() {
             throw new NotImplementedException();
         }
     }

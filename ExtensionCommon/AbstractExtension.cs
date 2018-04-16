@@ -6,15 +6,18 @@ using System.Threading.Tasks;
 
 namespace Lirui.TagLibray.ExtensionCommon {
     public abstract class AbstractExtension : IExtensionCommon {
-        public async Task<List<string>> BeginGetTags(string filename) {
-            Func<List<string>> func = () => {
-                return this.GetTags(filename);
+        
+        protected string Filename { get; set; }
+        
+        public async Task<Dictionary<string, string>> BeginGetTags() {
+            Func<Dictionary<string, string>> func = () => {
+                return GetTags();
             };
-            Task<List<string>> task = new Task<List<string>>(func);
+            Task<Dictionary<string, string>> task = new Task<Dictionary<string, string>>(func);
             task.Start();
             return await task;
         }
 
-        public abstract List<string> GetTags(string filename);
+        public abstract Dictionary<string, string> GetTags();
     }
 }

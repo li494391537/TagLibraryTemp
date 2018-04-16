@@ -4,15 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E5524F75-6DBC-4F13-91CB-0471D959FAA0}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>Extension.mp3.Test</RootNamespace>
-    <AssemblyName>Extension.mp3.Test</AssemblyName>
+    <ProjectGuid>{AE8BCE78-D349-4083-8DEE-A7069F470480}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DatabaseHelper</RootNamespace>
+    <AssemblyName>DatabaseHelper</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -41,21 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Extension.mp3\Extension.mp3.csproj">
-      <Project>{f176ae4b-f35a-4735-98b6-e4e2a46f5ac9}</Project>
-      <Name>Extension.mp3</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ExtensionCommon\ExtensionCommon.csproj">
-      <Project>{987e0f54-473f-4405-b65f-a4a25cbd03d7}</Project>
-      <Name>ExtensionCommon</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
