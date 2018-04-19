@@ -64,7 +64,7 @@
                     </ScrollViewer>
                 </Grid>
                 <!--Tag列表-->
-                <usercontrols:TagTreeView Grid.Row="1" x:Name="tagTree" BorderBrush="#FF828790"/>
+                <usercontrols:TagTreeView Grid.Row="1" x:Name="tagTree" BorderBrush="#FF828790" TagCheckChanged="TagTree_TagCheckChanged"/>
 
 
             </Grid>

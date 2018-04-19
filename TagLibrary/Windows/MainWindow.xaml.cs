@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,7 +22,7 @@ namespace TagLibrary.Windows {
 
         SqlSugarClient db;
 
-        List<TagLibrary.Models.FileInfo> files;
+        List<FileInfo> files;
         List<TagInfo> tags;
         List<FileTagMapper> mappers;
         BindingList<HostInfo> hosts = new BindingList<HostInfo>();
@@ -36,10 +35,10 @@ namespace TagLibrary.Windows {
 
             InitializeComponent();
             //初始化存储目录
-            Directory.CreateDirectory("library");
+            System.IO.Directory.CreateDirectory("library");
 
             #region TEST
-            //File.Delete("data.db");
+            //System.IO.File.Delete("data.db");
             #endregion
 
             #region 初始化数据库
@@ -198,7 +197,12 @@ namespace TagLibrary.Windows {
             } else {
                 hosts[0].Status = "online";
             }
-
+            List<int> i = new List<int> { 1, 2, 3, 4, 5 };
+            List<int> j = new List<int> { 3, 4, 5, 6, 7 };
+            var result1 = i.DefaultIfEmpty().Join(j.DefaultIfEmpty(), x => x, y => y, (x, y) => new { x, y }).DefaultIfEmpty();
+            result1 = result1.DefaultIfEmpty();
+            var result2 = i.GroupJoin(j, x => x, y => y, (x, y) => new { x, y });
+            var result3 = result2.ToDictionary(item => item.x, item => item.y);
         }
 
         /// <summary>
@@ -324,11 +328,11 @@ namespace TagLibrary.Windows {
         /// </summary>
         /// <param name="fullFileName"></param>
         private void AddFile(string fullFileName) {
-            var fileInfo = new TagLibrary.Models.FileInfo() {
-                Name = Path.GetFileName(fullFileName),
+            var fileInfo = new FileInfo() {
+                Name = System.IO.Path.GetFileName(fullFileName),
                 UUID = Guid.NewGuid().ToString().Replace("-", ""),
-                OriginalPath = Path.GetDirectoryName(fullFileName),
-                Format = Path.GetExtension(fullFileName).TrimStart('.').ToUpper()
+                OriginalPath = System.IO.Path.GetDirectoryName(fullFileName),
+                Format = System.IO.Path.GetExtension(fullFileName).TrimStart('.').ToUpper()
             };
             fileInfo = db.Insertable(fileInfo).ExecuteReturnEntity();
             //(fileList.ItemsSource as BindingList<TagLibrary.Models.FileInfo>).Add(fileInfo);
@@ -403,21 +407,21 @@ namespace TagLibrary.Windows {
         //}
 
         private void TestData() {
-            foreach (var file in Directory.EnumerateFiles("library")) {
-                File.Delete(file);
+            foreach (var file in System.IO.Directory.EnumerateFiles("library")) {
+                System.IO.File.Delete(file);
             }
 
             #region Add File
-            foreach (var file in Directory.EnumerateFiles(@"D:\test")) {
+            foreach (var file in System.IO.Directory.EnumerateFiles(@"D:\test")) {
                 var fileInfo = new TagLibrary.Models.FileInfo() {
-                    Name = Path.GetFileName(file),
+                    Name = System.IO.Path.GetFileName(file),
                     UUID = Guid.NewGuid().ToString().Replace("-", ""),
-                    OriginalPath = Path.GetDirectoryName(file),
-                    Format = Path.GetExtension(file).TrimStart('.').ToUpper(),
-                    Size = File.OpenRead(file).Length
+                    OriginalPath = System.IO.Path.GetDirectoryName(file),
+                    Format = System.IO.Path.GetExtension(file).TrimStart('.').ToUpper(),
+                    Size = System.IO.File.OpenRead(file).Length
                 };
                 db.Insertable(fileInfo).ExecuteCommand();
-                File.Copy(file, "library\\" + fileInfo.UUID + Path.GetExtension(file));
+                System.IO.File.Copy(file, "library\\" + fileInfo.UUID + System.IO.Path.GetExtension(file));
             }
             #endregion
             #region Add Tag
@@ -489,6 +493,9 @@ namespace TagLibrary.Windows {
                 File = fileList.SelectedItem as Models.FileInfo
             };
             setTagWindow.ShowDialog();
+        }
+
+        private void TagTree_TagCheckChanged(List<int> selectedTagIds) {
         }
     }
 }
