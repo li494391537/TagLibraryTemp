@@ -1,5 +1,4 @@
-﻿using Lirui.TagCommon;
-using SqlSugar;
+﻿using SqlSugar;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using TagLibrary.NetworkHelper;
+using TagLibrary.Models;
 
 namespace TagLibrary.Windows {
     /// <summary>
@@ -23,7 +23,7 @@ namespace TagLibrary.Windows {
 
         SqlSugarClient db;
 
-        List<Lirui.TagCommon.FileInfo> files;
+        List<TagLibrary.Models.FileInfo> files;
         List<TagInfo> tags;
         List<FileTagMapper> mappers;
         BindingList<HostInfo> hosts = new BindingList<HostInfo>();
@@ -108,10 +108,10 @@ namespace TagLibrary.Windows {
 
 
             //初始化文件列表
-            files = db.Queryable<Lirui.TagCommon.FileInfo>().ToList();
-            fileList.ItemsSource = new BindingList<Lirui.TagCommon.FileInfo>();
+            files = db.Queryable<TagLibrary.Models.FileInfo>().ToList();
+            fileList.ItemsSource = new BindingList<TagLibrary.Models.FileInfo>();
             foreach (var item in files) {
-                (fileList.ItemsSource as BindingList<Lirui.TagCommon.FileInfo>).Add(item);
+                (fileList.ItemsSource as BindingList<TagLibrary.Models.FileInfo>).Add(item);
             }
 
             //初始化文件格式列表
@@ -304,7 +304,7 @@ namespace TagLibrary.Windows {
         /// </summary>
         private void CodeFirst() {
             if (!db.DbMaintenance.IsAnyTable("FileInfo")) {
-                db.CodeFirst.InitTables(typeof(Lirui.TagCommon.FileInfo));
+                db.CodeFirst.InitTables(typeof(TagLibrary.Models.FileInfo));
             }
             if (!db.DbMaintenance.IsAnyTable("TagInfo")) {
                 db.CodeFirst.InitTables(typeof(TagInfo));
@@ -324,14 +324,14 @@ namespace TagLibrary.Windows {
         /// </summary>
         /// <param name="fullFileName"></param>
         private void AddFile(string fullFileName) {
-            var fileInfo = new Lirui.TagCommon.FileInfo() {
+            var fileInfo = new TagLibrary.Models.FileInfo() {
                 Name = Path.GetFileName(fullFileName),
                 UUID = Guid.NewGuid().ToString().Replace("-", ""),
                 OriginalPath = Path.GetDirectoryName(fullFileName),
                 Format = Path.GetExtension(fullFileName).TrimStart('.').ToUpper()
             };
             fileInfo = db.Insertable(fileInfo).ExecuteReturnEntity();
-            //(fileList.ItemsSource as BindingList<Lirui.TagCommon.FileInfo>).Add(fileInfo);
+            //(fileList.ItemsSource as BindingList<TagLibrary.Models.FileInfo>).Add(fileInfo);
             files.Add(fileInfo);
         }
 
@@ -340,9 +340,9 @@ namespace TagLibrary.Windows {
         /// </summary>
         /// <param name="fileId"></param>
         private void RemoveFile(int fileId) {
-            db.Deleteable<Lirui.TagCommon.FileInfo>(fileId).ExecuteCommand();
-            (fileList.ItemsSource as BindingList<Lirui.TagCommon.FileInfo>)
-                .Remove((fileList.ItemsSource as BindingList<Lirui.TagCommon.FileInfo>).Where(fileInfo => fileInfo.Id == fileId).First());
+            db.Deleteable<TagLibrary.Models.FileInfo>(fileId).ExecuteCommand();
+            (fileList.ItemsSource as BindingList<TagLibrary.Models.FileInfo>)
+                .Remove((fileList.ItemsSource as BindingList<TagLibrary.Models.FileInfo>).Where(fileInfo => fileInfo.Id == fileId).First());
 
         }
 
@@ -409,7 +409,7 @@ namespace TagLibrary.Windows {
 
             #region Add File
             foreach (var file in Directory.EnumerateFiles(@"D:\test")) {
-                var fileInfo = new Lirui.TagCommon.FileInfo() {
+                var fileInfo = new TagLibrary.Models.FileInfo() {
                     Name = Path.GetFileName(file),
                     UUID = Guid.NewGuid().ToString().Replace("-", ""),
                     OriginalPath = Path.GetDirectoryName(file),
@@ -480,5 +480,15 @@ namespace TagLibrary.Windows {
             // GC.SuppressFinalize(this);
         }
         #endregion
+
+        private void MenuItemSetTag_Click(object sender, RoutedEventArgs e) {
+            var setTagWindow = new SetTag() {
+                Owner = this,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Tags = tags,
+                File = fileList.SelectedItem as Models.FileInfo
+            };
+            setTagWindow.ShowDialog();
+        }
     }
 }

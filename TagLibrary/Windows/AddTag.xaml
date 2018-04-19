@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:TagLibrary.Windows"
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="AddTag" Height="140" Width="500"
+        Title="AddTag" Height="155" Width="500"
         ResizeMode="NoResize">
     <Grid>
         <Grid.RowDefinitions>
@@ -52,9 +52,9 @@
                 </Grid.ColumnDefinitions>
 
                 <Label Grid.Column="0">Group:</Label>
-                <TextBox Grid.Column="2" x:Name="tagGroup"/>
+                <TextBox Grid.Column="2" x:Name="tagGroup" MaxLines="1"/>
                 <Label Grid.Column="4">Name:</Label>
-                <TextBox Grid.Column="6" x:Name="tagName"/>
+                <TextBox Grid.Column="6" x:Name="tagName" MaxLines="1"/>
             </Grid>
 
             <Grid Grid.Row="2">

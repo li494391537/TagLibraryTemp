@@ -77,7 +77,7 @@
                             <MenuItem Header="复制到..."/>
                             <MenuItem Header="剪切到..."/>
                             <Separator />
-                            <MenuItem Header="设置Tag"/>
+                            <MenuItem Header="设置Tag" Click="MenuItemSetTag_Click"/>
                             <Separator />
                             <MenuItem Header="全部选择"/>
                             <MenuItem Header="全选取消"/>

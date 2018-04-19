@@ -1,5 +1,4 @@
-﻿using Lirui.TagCommon;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -7,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using TagLibrary.Windows;
+using TagLibrary.Models;
 
 namespace TagLibrary.UserControls {
     /// <summary>
