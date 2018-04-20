@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TagLibrary.Windows"
         xmlns:usercontrols="clr-namespace:TagLibrary.UserControls"
+        xmlns:valueConverter="clr-namespace:TagLibrary.ValueConverter"
         mc:Ignorable="d"
         Title="MainWindow" Height="600" Width="1000">
     <Grid>
@@ -17,14 +18,14 @@
         <!--菜单栏-->
         <Menu Grid.Row="0" FontSize="14">
             <MenuItem Header="文件" >
-                <MenuItem Header="添加文件" Click="AddFile_Click"/>
-                <MenuItem Header="关闭" Click="Close_Click"/>
+                <MenuItem Header="添加文件" Click="Menu_File_AddFile_Click"/>
+                <MenuItem Header="关闭" Click="Menu_File_Close_Click"/>
             </MenuItem>
             <MenuItem Header="标签">
-                <MenuItem Header="添加标签" Click="AddTag_Click"/>
+                <MenuItem Header="添加标签" Click="Menu_File_AddTag_Click"/>
             </MenuItem>
-            <MenuItem Header="设置" Click="Settings_Click"/>
-            <MenuItem Header="关于" Click="About_Click"/>
+            <MenuItem Header="设置" Click="Menu_File_Settings_Click"/>
+            <MenuItem Header="关于" Click="Menu_File_About_Click"/>
             <MenuItem Header="测试" Click="Test_Click"/>
         </Menu>
 
@@ -77,7 +78,7 @@
                             <MenuItem Header="复制到..."/>
                             <MenuItem Header="剪切到..."/>
                             <Separator />
-                            <MenuItem Header="设置Tag" Click="MenuItemSetTag_Click"/>
+                            <MenuItem Header="设置Tag" Click="FileList_ContextMenu_SetTag_Click"/>
                             <Separator />
                             <MenuItem Header="全部选择"/>
                             <MenuItem Header="全选取消"/>
@@ -88,7 +89,15 @@
                         <GridView>
                             <GridView.Columns>
                                 <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Path=Name}"/>
-                                <GridViewColumn Header="Size" DisplayMemberBinding="{Binding Path=Size}"/>
+                                <GridViewColumn Header="Size">
+                                    <GridViewColumn.DisplayMemberBinding>
+                                        <Binding Path="Size">
+                                            <Binding.Converter>
+                                                <valueConverter:FileSizeValueConverter/>
+                                            </Binding.Converter>
+                                        </Binding>
+                                    </GridViewColumn.DisplayMemberBinding>
+                                </GridViewColumn>
                             </GridView.Columns>
                         </GridView>
                     </ListView.View>

@@ -107,10 +107,10 @@ namespace TagLibrary.Windows {
 
 
             //初始化文件列表
-            files = db.Queryable<TagLibrary.Models.FileInfo>().ToList();
-            fileList.ItemsSource = new BindingList<TagLibrary.Models.FileInfo>();
+            files = db.Queryable<FileInfo>().ToList();
+            fileList.ItemsSource = new BindingList<FileInfo>();
             foreach (var item in files) {
-                (fileList.ItemsSource as BindingList<TagLibrary.Models.FileInfo>).Add(item);
+                (fileList.ItemsSource as BindingList<FileInfo>).Add(item);
             }
 
             //初始化文件格式列表
@@ -167,18 +167,6 @@ namespace TagLibrary.Windows {
             hostSelect.ItemsSource = hosts;
             hostList.ItemsSource = hosts;
             hosts.Add(new HostInfo("localhost"));
-            hosts.Add(new HostInfo("127.0.0.1"));
-            hosts.Add(new HostInfo("127.0.0.2"));
-            hosts.Add(new HostInfo("127.0.0.3"));
-            hosts.Add(new HostInfo("127.0.0.4"));
-            hosts.Add(new HostInfo("127.0.0.5"));
-            hosts.Add(new HostInfo("127.0.0.6"));
-            hosts.Add(new HostInfo("127.0.0.7"));
-            hosts.Add(new HostInfo("127.0.0.8"));
-            hosts.Add(new HostInfo("127.0.0.9"));
-            hosts.Add(new HostInfo("127.0.0.10"));
-            hosts.Add(new HostInfo("127.0.0.11"));
-            hosts.Add(new HostInfo("127.0.0.12"));
             hostSelect.SelectedIndex = 0;
 
             #endregion
@@ -188,48 +176,62 @@ namespace TagLibrary.Windows {
 
         }
 
-        #region Click Event
+        #region 菜单栏事件处理方法
 
         private void Test_Click(object sender, RoutedEventArgs e) {
             new TextRange(test1.Document.ContentStart, test1.Document.ContentEnd).Text = "";
-            if (hosts[0].Status == "online") {
-                hosts[0].Status = "offline";
-            } else {
-                hosts[0].Status = "online";
-            }
-            List<int> i = new List<int> { 1, 2, 3, 4, 5 };
-            List<int> j = new List<int> { 3, 4, 5, 6, 7 };
-            var result1 = i.DefaultIfEmpty().Join(j.DefaultIfEmpty(), x => x, y => y, (x, y) => new { x, y }).DefaultIfEmpty();
-            result1 = result1.DefaultIfEmpty();
-            var result2 = i.GroupJoin(j, x => x, y => y, (x, y) => new { x, y });
-            var result3 = result2.ToDictionary(item => item.x, item => item.y);
+            int[] i = { 1, 2, 3, 4, 5 };
+            int[] j = { 3, 4, 5, 6, 7 };
+            var t =
+            i.Select(x => x as int?).ToList();
+            t.Add(null);
+            var result1 = i.Except(j);
+            var result2 = j.Except(i);
         }
 
         /// <summary>
-        /// 添加文件
+        /// 菜单栏->文件->添加文件
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void AddFile_Click(object sender, RoutedEventArgs e) {
-            var addFile = new AddFile() {
+        private void Menu_File_AddFile_Click(object sender, RoutedEventArgs e) {
+            var addFileWindow = new AddFile() {
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Owner = this,
-                Tags = tags ?? new List<TagInfo>()
+                Tags = tags.Where(x=> !x.Group.StartsWith("Default - ")).ToList() ?? new List<TagInfo>()
             };
-            addFile.ShowDialog();
+            addFileWindow.ShowDialog();
+            if (addFileWindow.IsOK) {
+                foreach (var filename in addFileWindow.FileNames) {
+                    AddFile(filename);
+                    var oldTags = addFileWindow.SelectedTags.Where(x => x.Id != null).ToList();
+                    var newTags = addFileWindow.SelectedTags.Where(x => x.Id == null).ToList();
+                    newTags.ForEach(x => AddTag(x));
+                    var newTagsWithId = tags.Join(newTags, x => new { x.Name, x.Group }, y => new { y.Name, y.Group }, (x, y) => x);
+                    AddMapper(files.Where(x => x.Name == System.IO.Path.GetFileName(filename) && x.OriginalPath == System.IO.Path.GetDirectoryName(filename)).First()
+                        , oldTags.Concat(newTagsWithId).ToList());
+                    TagTree_TagCheckChanged(tagTree.SelectedTag);
+                }
+            }
         }
 
         /// <summary>
-        /// 添加标签
+        /// 菜单栏->标签->添加标签
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void AddTag_Click(object sender, RoutedEventArgs e) {
-            var addTag = new AddTag() {
+        private void Menu_File_AddTag_Click(object sender, RoutedEventArgs e) {
+            var addTagWindow = new AddTag() {
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Owner = this
             };
-            addTag.ShowDialog();
+            addTagWindow.ShowDialog();
+            if (addTagWindow.IsOK) {
+                AddTag(new TagInfo() {
+                    Name = addTagWindow.TagName,
+                    Group = addTagWindow.TagGroup
+                });
+            }
         }
 
         /// <summary>
@@ -237,7 +239,7 @@ namespace TagLibrary.Windows {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Close_Click(object sender, RoutedEventArgs e) {
+        private void Menu_File_Close_Click(object sender, RoutedEventArgs e) {
             if (MessageBox.Show("真的要退出么！", "TagLibrary", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes) {
                 Application.Current.Shutdown();
             }
@@ -248,7 +250,7 @@ namespace TagLibrary.Windows {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void About_Click(object sender, RoutedEventArgs e) {
+        private void Menu_File_About_Click(object sender, RoutedEventArgs e) {
             MessageBox.Show($"TagLibrary\nVersion {version}\nCopyright © 2018 by LiRui");
         }
 
@@ -257,7 +259,7 @@ namespace TagLibrary.Windows {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Settings_Click(object sender, RoutedEventArgs e) {
+        private void Menu_File_Settings_Click(object sender, RoutedEventArgs e) {
             var settings = new Setting {
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Owner = this
@@ -266,6 +268,30 @@ namespace TagLibrary.Windows {
         }
 
         #endregion
+
+        #region 文件列表事件处理方法
+
+        /// <summary>
+        /// 文件列表->右键->设置标签
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FileList_ContextMenu_SetTag_Click(object sender, RoutedEventArgs e) {
+            var setTagWindow = new SetTag() {
+                Owner = this,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Tags = tags.Where(x => !x.Group.StartsWith("Default - ")).ToList() ??new List<TagInfo>(),
+                File = fileList.SelectedItem as FileInfo,
+                SelectedTags = mappers
+                               .Where(x => x.FileId == (fileList.SelectedItem as FileInfo).Id)
+                               .Join(tags, x => x.TagId, y => y.Id, (x, y) => y)
+                               .ToList(),
+            };
+            setTagWindow.AddingTag += (sender1, tagInfo) => {
+                AddTag(tagInfo);
+            };
+            setTagWindow.ShowDialog();
+        }
 
         /// <summary>
         /// 文件列表选择项变化时的处理方法
@@ -276,6 +302,34 @@ namespace TagLibrary.Windows {
             new TextRange(test1.Document.ContentStart, test1.Document.ContentEnd).Text = "";
             test1.AppendText("FileList_SelectionChanged");
         }
+
+        #endregion
+
+        #region 其他事件处理方法
+
+        /// <summary>
+        /// 事件->TagTree->选择Tag变化
+        /// </summary>
+        /// <param name="selectedTags"></param>
+        private void TagTree_TagCheckChanged(List<TagInfo> selectedTags) {
+            if (selectedTags.Count() == 0) {
+                (fileList.ItemsSource as BindingList<FileInfo>).Clear();
+                foreach (var item in files) {
+                    (fileList.ItemsSource as BindingList<FileInfo>).Add(item);
+                }
+            } else {
+                var selectFiles = selectedTags
+                .Join(mappers, x => x.Id, y => y.TagId, (x, y) => y.FileId)
+                .Join(files, x => x, y => y.Id, (x, y) => y)
+                .ToList();
+                (fileList.ItemsSource as BindingList<FileInfo>).Clear();
+                foreach (var item in selectFiles) {
+                    (fileList.ItemsSource as BindingList<FileInfo>).Add(item);
+                }
+            }
+        }
+
+        #endregion
 
         /// <summary>
         /// 检查数据库版本
@@ -308,7 +362,7 @@ namespace TagLibrary.Windows {
         /// </summary>
         private void CodeFirst() {
             if (!db.DbMaintenance.IsAnyTable("FileInfo")) {
-                db.CodeFirst.InitTables(typeof(TagLibrary.Models.FileInfo));
+                db.CodeFirst.InitTables(typeof(FileInfo));
             }
             if (!db.DbMaintenance.IsAnyTable("TagInfo")) {
                 db.CodeFirst.InitTables(typeof(TagInfo));
@@ -328,15 +382,24 @@ namespace TagLibrary.Windows {
         /// </summary>
         /// <param name="fullFileName"></param>
         private void AddFile(string fullFileName) {
-            var fileInfo = new FileInfo() {
-                Name = System.IO.Path.GetFileName(fullFileName),
-                UUID = Guid.NewGuid().ToString().Replace("-", ""),
-                OriginalPath = System.IO.Path.GetDirectoryName(fullFileName),
-                Format = System.IO.Path.GetExtension(fullFileName).TrimStart('.').ToUpper()
-            };
+            FileInfo fileInfo;
+            using (var fileStream = System.IO.File.OpenRead(fullFileName)) {
+                fileInfo = new FileInfo() {
+                    Name = System.IO.Path.GetFileName(fullFileName),
+                    UUID = Guid.NewGuid().ToString().Replace("-", ""),
+                    OriginalPath = System.IO.Path.GetDirectoryName(fullFileName),
+                    Format = System.IO.Path.GetExtension(fullFileName).TrimStart('.').ToUpper(),
+                    Size = fileStream.Length
+                };
+            }
+            System.IO.File.Copy(fullFileName, "library\\" + fileInfo.UUID + "." + fileInfo.Format);
             fileInfo = db.Insertable(fileInfo).ExecuteReturnEntity();
-            //(fileList.ItemsSource as BindingList<TagLibrary.Models.FileInfo>).Add(fileInfo);
+            //(fileList.ItemsSource as BindingList<FileInfo>).Add(fileInfo);
             files.Add(fileInfo);
+
+            //添加默认标签
+            AddTag(new TagInfo() { Group = "Default - Format", Name = fileInfo.Format });
+            AddMapper(fileInfo, tags.Where(x => x.Group == "Default - Format" && x.Name == fileInfo.Format).ToList());
         }
 
         /// <summary>
@@ -344,9 +407,9 @@ namespace TagLibrary.Windows {
         /// </summary>
         /// <param name="fileId"></param>
         private void RemoveFile(int fileId) {
-            db.Deleteable<TagLibrary.Models.FileInfo>(fileId).ExecuteCommand();
-            (fileList.ItemsSource as BindingList<TagLibrary.Models.FileInfo>)
-                .Remove((fileList.ItemsSource as BindingList<TagLibrary.Models.FileInfo>).Where(fileInfo => fileInfo.Id == fileId).First());
+            db.Deleteable<FileInfo>(fileId).ExecuteCommand();
+            (fileList.ItemsSource as BindingList<FileInfo>)
+                .Remove((fileList.ItemsSource as BindingList<FileInfo>).Where(fileInfo => fileInfo.Id == fileId).First());
 
         }
 
@@ -375,29 +438,14 @@ namespace TagLibrary.Windows {
         /// 添加Tag
         /// </summary>
         /// <param name="tagInfo"></param>
-        //private void AddTag(TagInfo tagInfo) {
-        //    // 判断是否有重复TagInfo
-        //    if (tags.Where(item => item.Name == tagInfo.Name && item.Group == tagInfo.Group).Count() == 0) {
-        //        tagInfo = db.Insertable(tagInfo).ExecuteReturnEntity();
-        //        tags.Add(tagInfo);
-        //        var tag = new CheckBox() { DataContext = tagInfo };
-        //        tag.SetBinding(ContentProperty, new Binding("Name"));
-        //        tag.Checked += Tag_Checked;
-        //        tag.Unchecked += Tag_Checked;
-        //        var groups = tagTree.ItemsSource as BindingList<TreeViewItem>;
-        //        if (groups.Where(item => (item.DataContext as TagInfo).Group == tagInfo.Group).Count() == 0) {
-        //            var group = new TreeViewItem() {
-        //                DataContext = tagInfo,
-        //                ItemsSource = new BindingList<CheckBox>() { tag }
-        //            };
-        //            group.SetBinding(HeaderedItemsControl.HeaderProperty, new Binding("Group"));
-        //            groups.Add(group);
-        //        } else {
-        //            (groups.Where(group => (group.DataContext as TagInfo).Group == tagInfo.Group).First().ItemsSource as BindingList<CheckBox>)
-        //                .Add(tag);
-        //        }
-        //    }
-        //}
+        private void AddTag(TagInfo tagInfo) {
+            // 判断是否有重复TagInfo
+            if (tags.Where(item => item.Name == tagInfo.Name && item.Group == tagInfo.Group).Count() == 0) {
+                tagInfo = db.Insertable(tagInfo).ExecuteReturnEntity();
+                tags.Add(tagInfo);
+                tagTree.AddTag(new List<TagInfo>() { tagInfo });
+            }
+        }
 
         /// <summary>
         /// 删除Tag
@@ -406,6 +454,18 @@ namespace TagLibrary.Windows {
         //private void RemoveTag(TagInfo tagInfo) {
         //}
 
+        private void AddMapper(FileInfo fileInfo, List<TagInfo> tagInfos) {
+            var tagIds = mappers
+                .Where(x => x.FileId == fileInfo.Id)
+                .Select(x => x.TagId);
+            var notNeedAdd = tagInfos.Join(tagIds, x => x.Id, y => y, (x, y) => x);
+            tagInfos = tagInfos.Except(notNeedAdd).ToList();
+            tagInfos
+                .Select(x => new FileTagMapper() { FileId = fileInfo.Id ?? 0, TagId = x.Id ?? 0 })
+                .ToList()
+                .ForEach(x => mappers.Add(db.Insertable(x).ExecuteReturnEntity()));
+        }
+
         private void TestData() {
             foreach (var file in System.IO.Directory.EnumerateFiles("library")) {
                 System.IO.File.Delete(file);
@@ -413,7 +473,7 @@ namespace TagLibrary.Windows {
 
             #region Add File
             foreach (var file in System.IO.Directory.EnumerateFiles(@"D:\test")) {
-                var fileInfo = new TagLibrary.Models.FileInfo() {
+                var fileInfo = new FileInfo() {
                     Name = System.IO.Path.GetFileName(file),
                     UUID = Guid.NewGuid().ToString().Replace("-", ""),
                     OriginalPath = System.IO.Path.GetDirectoryName(file),
@@ -485,17 +545,5 @@ namespace TagLibrary.Windows {
         }
         #endregion
 
-        private void MenuItemSetTag_Click(object sender, RoutedEventArgs e) {
-            var setTagWindow = new SetTag() {
-                Owner = this,
-                WindowStartupLocation = WindowStartupLocation.CenterOwner,
-                Tags = tags,
-                File = fileList.SelectedItem as Models.FileInfo
-            };
-            setTagWindow.ShowDialog();
-        }
-
-        private void TagTree_TagCheckChanged(List<int> selectedTagIds) {
-        }
     }
 }

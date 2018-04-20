@@ -139,6 +139,7 @@
     <Compile Include="UserControls\TagTreeView.xaml.cs">
       <DependentUpon>TagTreeView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ValueConverter\FileSizeValueConverter.cs" />
     <Compile Include="Windows\AddFile.xaml.cs">
       <DependentUpon>AddFile.xaml</DependentUpon>
     </Compile>

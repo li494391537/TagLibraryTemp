@@ -48,7 +48,7 @@
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <Label Grid.Column="0" FontSize="14">添加文件:</Label>
-                <TextBox Name="fileName" Grid.Column="2" Text="" MaxLines="1" FontSize="14"/>
+                <TextBox Name="fileName" Grid.Column="2" Text="" MaxLines="1" FontSize="14" IsReadOnly="True"/>
                 <Button Grid.Column="4" Click="SelectFile_Click" Padding="8, 2" FontSize="14">选择文件</Button>
             </Grid>
             <!--标签设置-->
@@ -61,7 +61,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <usercontrols:TagTreeView x:Name="tagTreeView" Grid.Column="0"/>
+                <usercontrols:TagTreeView x:Name="tagTreeView" Grid.Column="0" AddingTag="TagTreeView_AddingTag"/>
 
                 <Grid Grid.Column="2">
                     <Grid.RowDefinitions>

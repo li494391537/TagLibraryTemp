@@ -19,6 +19,7 @@ namespace TagLibrary.Windows {
     /// </summary>
     public partial class SetTag : Window {
         private List<TagInfo> tags = new List<TagInfo>();
+        public event Action<object, TagInfo> AddingTag;
         public List<TagInfo> Tags {
             set {
                 tags = value;
@@ -34,6 +35,7 @@ namespace TagLibrary.Windows {
                 selectedTags = value;
                 if (tagSelectedTreeView != null) {
                     tagSelectedTreeView.Tags = selectedTags;
+                    tagSelectedTreeView.ExpandAll();
                 }
             }
         }
@@ -53,22 +55,25 @@ namespace TagLibrary.Windows {
         }
 
         private void SelectTag_Click(object sender, RoutedEventArgs e) {
-            var selectTag = tagTreeView.SelectedTag();
-            var tags = selectTag.Join(this.tags, x => x, y => y.Id, (x, y) => y).ToList();
-            tagSelectedTreeView.Tags = tags;
+            var selectTag = tagTreeView.SelectedTag;
+            var selectedTag = tagSelectedTreeView.Tags;
+            tagSelectedTreeView.AddTag(selectTag.Except(selectedTag).ToList());
             tagSelectedTreeView.ExpandAll();
         }
 
         private void CancelSelectTag_Click(object sender, RoutedEventArgs e) {
-            var tags = tagSelectedTreeView.SelectedTag();
+            var tags = tagSelectedTreeView.SelectedTag;
             tagTreeView.RemoveSelectedTag(tags);
             tagSelectedTreeView.RemoveTag(tags, true);
         }
 
         private void AddTag_Click(object sender, RoutedEventArgs e) {
-            var addTagWindow = new AddTag();
+            var addTagWindow = new AddTag() {
+                Owner = this,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
             addTagWindow.ShowDialog();
-            if (addTagWindow.Value) {
+            if (addTagWindow.IsOK) {
                 var tagInfo = new TagInfo() {
                     Name = addTagWindow.TagName,
                     Group = addTagWindow.TagGroup
@@ -77,7 +82,7 @@ namespace TagLibrary.Windows {
         }
 
         private void ButtonOK_Click(object sender, RoutedEventArgs e) {
-
+            Close();
         }
 
         private void ButtonCancel_Click(object sender, RoutedEventArgs e) {
@@ -87,6 +92,10 @@ namespace TagLibrary.Windows {
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             tagSelectedTreeView.HasContextMenu = false;
             fileName.Text = File.Name;
+        }
+
+        private void TagTreeView_AddingTag(object sender, TagInfo tagInfo) {
+            AddingTag?.Invoke(this, tagInfo);
         }
     }
 }

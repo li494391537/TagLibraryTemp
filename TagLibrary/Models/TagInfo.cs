@@ -5,7 +5,7 @@ namespace TagLibrary.Models {
     public class TagInfo : INotifyPropertyChanged {
 
         [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         private string name;
         [SugarColumn(IsNullable = false)]

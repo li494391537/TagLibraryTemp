@@ -4,7 +4,7 @@ namespace TagLibrary.Models {
     public class FileInfo {
 
         [SugarColumn(IsPrimaryKey = true, IsIdentity = true)]
-        public int Id { get; set; }
+        public int? Id { get; set; }
 
         [SugarColumn(IsNullable = false)]
         public string UUID { get; set; }

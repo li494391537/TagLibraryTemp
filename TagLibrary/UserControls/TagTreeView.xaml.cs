@@ -13,14 +13,26 @@ namespace TagLibrary.UserControls {
     /// TagTreeView.xaml 的交互逻辑
     /// </summary>
     public partial class TagTreeView : UserControl {
-        public event Action<List<int>> TagCheckChanged;
+
+        #region Event
+        public event Action<List<TagInfo>> TagCheckChanged;
         public event Action<object, TagInfo> AddingTag;
+        #endregion
+
+        #region Property
         public bool HasContextMenu { get; set; } = true;
-        private List<TagInfo> tags = new List<TagInfo>();
+
         public List<TagInfo> Tags {
+            get {
+                return (tagTree.ItemsSource as BindingList<TreeViewItem>)
+                       .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
+                       .Select(x => x.DataContext as TagInfo)
+                       .ToList();
+            }
             set {
-                tags = value;
+                var tags = value;
                 var groups = new BindingList<TreeViewItem>();
+                tagTree.ItemsSource = groups;
                 foreach (var item in tags.GroupBy(item => item.Group).Select(item => item.First())) {
                     var group = new TreeViewItem() {
                         DataContext = item,
@@ -32,8 +44,8 @@ namespace TagLibrary.UserControls {
                 foreach (var item in tags) {
                     var tag = new CheckBox() { DataContext = item };
                     tag.SetBinding(ContentProperty, new Binding("Name"));
-                    tag.Checked += Tag_Checked;
-                    tag.Unchecked += Tag_Checked;
+                    tag.Checked += Tag_CheckChanged;
+                    tag.Unchecked += Tag_CheckChanged;
                     (groups.Where(group => (group.DataContext as TagInfo).Group == item.Group).First().ItemsSource as BindingList<CheckBox>)
                         .Add(tag);
                 }
@@ -41,15 +53,51 @@ namespace TagLibrary.UserControls {
             }
         }
 
+        public List<TagInfo> SelectedTag {
+            get {
+                return
+                    (tagTree.ItemsSource as BindingList<TreeViewItem>)
+                    .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
+                    .Where(x => x.IsChecked ?? false)
+                    .Select(x => x.DataContext as TagInfo)
+                    .ToList();
+            }
+            set {
+                (tagTree.ItemsSource as BindingList<TreeViewItem>)
+                    .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
+                    .ToList()
+                    .ForEach(x => x.IsChecked = false);
+                (tagTree.ItemsSource as BindingList<TreeViewItem>)
+                    .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
+                    .Join(value, x => x.DataContext as TagInfo, y => y, (x, y) => x)
+                    .ToList()
+                    .ForEach(x => x.IsChecked = true);
+            }
+        }
+        #endregion
+
+        /// <summary>
+        /// 构造方法
+        /// </summary>
         public TagTreeView() {
             InitializeComponent();
+            tagTree.ItemsSource = new BindingList<TreeViewItem>();
         }
 
-        #region Click Event
-        private void MenuItemAddTag_Click(object sender, RoutedEventArgs e) {
-            var addTagWindow = new AddTag();
+        #region 右键菜单的事件处理方法
+
+        /// <summary>
+        /// 右键->添加Tag
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ContextMenuAddTag_Click(object sender, RoutedEventArgs e) {
+            var addTagWindow = new AddTag() {
+                Owner = Window.GetWindow(this),
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
             addTagWindow.ShowDialog();
-            if (addTagWindow.Value) {
+            if (addTagWindow.IsOK) {
                 AddingTag?.Invoke(this, new TagInfo {
                     Group = addTagWindow.TagGroup,
                     Name = addTagWindow.TagName
@@ -57,25 +105,83 @@ namespace TagLibrary.UserControls {
             }
         }
 
-        private void MenuItemCollapseAll_Click(object sender, RoutedEventArgs e) {
+        /// <summary>
+        /// 右键->全部折叠
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ContextMenuCollapseAll_Click(object sender, RoutedEventArgs e) {
             CollapseAll();
         }
 
-        private void MenuItemExpandAll_Click(object sender, RoutedEventArgs e) {
+        /// <summary>
+        /// 右键->全部展开
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ContextMenuExpandAll_Click(object sender, RoutedEventArgs e) {
             ExpandAll();
         }
+
+        /// <summary>
+        /// 右键->全部选择
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ContextMenuCheckAll_Click(object sender, RoutedEventArgs e) {
+            (tagTree.ItemsSource as BindingList<TreeViewItem>)
+                .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
+                .ToList()
+                .ForEach(x => x.IsChecked = true);
+            ExpandAll();
+        }
+
+        /// <summary>
+        /// 右键->全部取消
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MenuItemUncheckAll_Click(object sender, RoutedEventArgs e) =>
+            (tagTree.ItemsSource as BindingList<TreeViewItem>)
+                .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
+                .ToList()
+                .ForEach(x => x.IsChecked = false);
+
+        /// <summary>
+        /// 右键->反向选择
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ContextMenuInverse_Click(object sender, RoutedEventArgs e) =>
+            (tagTree.ItemsSource as BindingList<TreeViewItem>)
+                .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
+                .ToList()
+                .ForEach(x => x.IsChecked = !x.IsChecked);
+        
+
         #endregion
 
-        private void Tag_Checked(object sender, RoutedEventArgs e) {
-            var selectTag = new List<int>();
-            foreach (var group in (tagTree.ItemsSource as BindingList<TreeViewItem>)) {
-                foreach (var tag in (group.ItemsSource as BindingList<CheckBox>).Where(item => item.IsChecked == true)) {
-                    selectTag.Add((tag.DataContext as TagInfo).Id);
-                }
-            }
+        #region 其他事件的处理方法
+
+        /// <summary>
+        /// 选择项变化时
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Tag_CheckChanged(object sender, RoutedEventArgs e) {
+            var selectTag = (tagTree.ItemsSource as BindingList<TreeViewItem>)
+                            .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
+                            .Where(x => x.IsChecked == true)
+                            .Select(x => x.DataContext as TagInfo)
+                            .ToList();
             TagCheckChanged?.Invoke(selectTag);
         }
 
+        /// <summary>
+        /// 右键菜单打开时
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TagTree_ContextMenuOpening(object sender, ContextMenuEventArgs e) {
             if (!HasContextMenu) {
                 tagTreeContextMenu.IsEnabled = false;
@@ -83,18 +189,42 @@ namespace TagLibrary.UserControls {
             }
         }
 
+        #endregion
+
+        #region 折叠、展开
+
+        public void CollapseAll() {
+            (tagTree.ItemsSource as BindingList<TreeViewItem>)
+                .ToList()
+                .ForEach(x => x.IsExpanded = false);
+        }
+
+        public void ExpandAll() {
+            (tagTree.ItemsSource as BindingList<TreeViewItem>)
+                .ToList()
+                .ForEach(x => x.IsExpanded = true);
+
+        }
+
+        #endregion
+
+        #region 各种Public方法
+        /// <summary>
+        /// 向TreeView中添加Tags，PS：不会更改Tags，Tags只用来初始化TreeView，不会监测其变化
+        /// </summary>
+        /// <param name="tagInfos"></param>
         public void AddTag(List<TagInfo> tagInfos) {
             //唯一性约束检查
-            foreach (var tagInfo in tagInfos.Join(tags, x => new { x.Name, x.Group }, y => new { y.Name, y.Group }, (x, y) => x)) {
-                tagInfos.Remove(tagInfo);
-            }
+            //foreach (var tagInfo in tagInfos.Join(tags, x => new { x.Name, x.Group }, y => new { y.Name, y.Group }, (x, y) => x)) {
+            //    tagInfos.Remove(tagInfo);
+            //}
 
             foreach (var tagInfo in tagInfos) {
-                tags.Add(tagInfo);
+                //tags.Add(tagInfo);
                 var tag = new CheckBox() { DataContext = tagInfo };
                 tag.SetBinding(ContentProperty, new Binding("Name"));
-                tag.Checked += Tag_Checked;
-                tag.Unchecked += Tag_Checked;
+                tag.Checked += Tag_CheckChanged;
+                tag.Unchecked += Tag_CheckChanged;
                 var groups = tagTree.ItemsSource as BindingList<TreeViewItem>;
                 if (groups.Where(item => (item.DataContext as TagInfo).Group == tagInfo.Group).Count() == 0) {
                     var group = new TreeViewItem() {
@@ -110,97 +240,81 @@ namespace TagLibrary.UserControls {
             }
         }
 
-        public void RemoveTag(List<int> tagIds, bool isRemoveGroup = false) {
-            foreach (var tag in tagIds.Join(tags, x => x, y => y.Id, (x, y) => y)) {
-                tags.Remove(tag);
-                var groupBox = (tagTree.ItemsSource as BindingList<TreeViewItem>).Where(item => (item.DataContext as TagInfo).Group == tag.Group).First();
-                var tagBox = (groupBox.ItemsSource as BindingList<CheckBox>).Where(item => (item.DataContext as TagInfo).Name == tag.Name).First();
-                (groupBox.ItemsSource as BindingList<CheckBox>).Remove(tagBox);
-            }
-            if (isRemoveGroup) {
-                foreach (var item in (tagTree.ItemsSource as BindingList<TreeViewItem>).Where(item => (item.ItemsSource as BindingList<CheckBox>).Count == 0).ToList()) {
-                    (tagTree.ItemsSource as BindingList<TreeViewItem>).Remove(item);
-                }
-            }
-        }
-
-        public bool UpdateTag(TagInfo tagInfo) {
-            var tag = tags.Where(item => item.Id == tagInfo.Id).First();
-            var tempTag = new TagInfo() {
-                Id = tagInfo.Id,
-                Name = tagInfo.Name ?? tag.Name,
-                Group = tagInfo.Group ?? tag.Group
-            };
-            //唯一性约束检查
-            if (tags.Where(item => item.Group == tempTag.Group && item.Name == tempTag.Name).Count() == 0) {
-                tag.Name = tempTag.Name;
-                tag.Group = tempTag.Group;
-                return true;
-            }
-            return false;
-        }
-
-        public void AddSelectedTag(List<int> tagIds) {
-            List<CheckBox> allTags = new List<CheckBox>();
-            foreach (var group in tagTree.ItemsSource as BindingList<TreeViewItem>) {
-                foreach (var tag in group.ItemsSource as BindingList<CheckBox>) {
-                    allTags.Add(tag);
-                }
-            }
-            foreach (var tag in allTags.Join(tagIds, x => (x.DataContext as TagInfo).Id, y => y, (x, y) => x)) {
-                tag.IsChecked = true;
-            }
-        }
-
-        public void RemoveSelectedTag(List<int> tagIds) {
-            List<CheckBox> allTags = new List<CheckBox>();
-            foreach (var group in tagTree.ItemsSource as BindingList<TreeViewItem>) {
-                foreach (var tag in group.ItemsSource as BindingList<CheckBox>) {
-                    allTags.Add(tag);
-                }
-            }
-            foreach (var tag in allTags.Join(tagIds, x => (x.DataContext as TagInfo).Id, y => y, (x, y) => x)) {
-                tag.IsChecked = false;
-            }
-        }
-
-        public List<int> SelectedTag() {
-            var selectTag = new List<int>();
-            foreach (var group in (tagTree.ItemsSource as BindingList<TreeViewItem>)) {
-                foreach (var tag in (group.ItemsSource as BindingList<CheckBox>).Where(item => item.IsChecked == true)) {
-                    selectTag.Add((tag.DataContext as TagInfo).Id);
-                }
-            }
-            return selectTag;
-        }
-
-        #region 折叠、展开
-
-        public void CollapseGroup(string group) {
+        /// <summary>
+        /// 向TreeView中删除Tags，PS：不会更改Tags，Tags只用来初始化TreeView，不会监测其变化
+        /// </summary>
+        /// <param name="tagIds"></param>
+        /// <param name="isRemoveGroup"></param>
+        public void RemoveTag(List<TagInfo> tagInfos, bool isRemoveGroup = false) {
             (tagTree.ItemsSource as BindingList<TreeViewItem>)
-                .Where(item => (item.DataContext as TagInfo).Group == group)
-                .First()
-                .IsExpanded = false;
+                .SelectMany(x => x.ItemsSource as BindingList<CheckBox>, (x, y) => new { group = x, tag = y })
+                .Join(tagInfos, x => x.tag.DataContext as TagInfo, y => y, (x, y) => x)
+                .ToList()
+                .ForEach(x => {
+                    (x.group.ItemsSource as BindingList<CheckBox>).Remove(x.tag);
+                    if (!x.group.HasItems && isRemoveGroup) {
+                        (tagTree.ItemsSource as BindingList<TreeViewItem>).Remove(x.group);
+                    }
+                });
+
+            //foreach (var tag in tagIds.Join(tags, x => x, y => y.Id, (x, y) => y)) {
+            //    ///tags.Remove(tag);
+            //    var groupBox = (tagTree.ItemsSource as BindingList<TreeViewItem>).Where(item => (item.DataContext as TagInfo).Group == tag.Group).First();
+            //    var tagBox = (groupBox.ItemsSource as BindingList<CheckBox>).Where(item => (item.DataContext as TagInfo).Name == tag.Name).First();
+            //    (groupBox.ItemsSource as BindingList<CheckBox>).Remove(tagBox);
+            //}
+            //if (isRemoveGroup) {
+            //    foreach (var item in (tagTree.ItemsSource as BindingList<TreeViewItem>).Where(item => (item.ItemsSource as BindingList<CheckBox>).Count == 0).ToList()) {
+            //        (tagTree.ItemsSource as BindingList<TreeViewItem>).Remove(item);
+            //    }
+            //}
         }
 
-        public void CollapseAll() {
-            foreach (var group in tags.Select(item => item.Group).Distinct()) {
-                CollapseGroup(group);
-            }
+        /// <summary>
+        /// 在TreeView中更改Tags，PS：不会更改Tags，Tags只用来初始化TreeView，不会监测其变化
+        /// </summary>
+        /// <param name="tagInfo"></param>
+        /// <returns></returns>
+        public void UpdateTag(TagInfo tagInfo) {
+            var tag = (tagTree.ItemsSource as BindingList<TreeView>)
+                      .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
+                      .Select(x => x.DataContext as TagInfo)
+                      .Where(x => x.Id == tagInfo.Id)
+                      .First();
+            tagInfo.Name = tagInfo.Name ?? tag.Name;
+            tagInfo.Group = tagInfo.Group ?? tag.Group;
+            RemoveTag(new List<TagInfo>() { tagInfo });
+            AddTag(new List<TagInfo>() { tagInfo });
         }
 
-        public void ExpandGroup(string group) {
+        //public void AddSelectedTag(List<int> tagIds) {
+        //    List<CheckBox> allTags = new List<CheckBox>();
+        //    foreach (var group in tagTree.ItemsSource as BindingList<TreeViewItem>) {
+        //        foreach (var tag in group.ItemsSource as BindingList<CheckBox>) {
+        //            allTags.Add(tag);
+        //        }
+        //    }
+        //    foreach (var tag in allTags.Join(tagIds, x => (x.DataContext as TagInfo).Id, y => y, (x, y) => x)) {
+        //        tag.IsChecked = true;
+        //    }
+        //}
+
+        public void AddSelectedTag(List<TagInfo> tagInfos) {
             (tagTree.ItemsSource as BindingList<TreeViewItem>)
-                .Where(item => (item.DataContext as TagInfo).Group == group)
-                .First()
-                .IsExpanded = true;
+                .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
+                .Join(tagInfos, x => x.DataContext as TagInfo, y => y, (x, y) => x)
+                .ToList()
+                .ForEach(x => x.IsChecked = true);
         }
 
-        public void ExpandAll() {
-            foreach (var group in tags.Select(item => item.Group).Distinct()) {
-                ExpandGroup(group);
-            }
+        public void RemoveSelectedTag(List<TagInfo> tagInfos) {
+            (tagTree.ItemsSource as BindingList<TreeViewItem>)
+                .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
+                .Join(tagInfos, x => x.DataContext as TagInfo, y => y, (x, y) => x)
+                .ToList()
+                .ForEach(x => x.IsChecked = false);
         }
         #endregion
+
     }
 }

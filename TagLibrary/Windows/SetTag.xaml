@@ -59,7 +59,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <usercontrols:TagTreeView x:Name="tagTreeView" Grid.Column="0"/>
+                <usercontrols:TagTreeView x:Name="tagTreeView" Grid.Column="0" AddingTag="TagTreeView_AddingTag"/>
 
                 <Grid Grid.Column="2">
                     <Grid.RowDefinitions>
