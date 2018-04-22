@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:TagLibrary.Windows"
         xmlns:valueConverter="clr-namespace:TagLibrary.ValueConverter"
         mc:Ignorable="d"
-        Title="Setting" Height="450" Width="800">
+        Title="Setting" Height="450" Width="800"
+        Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="10"/>
@@ -39,6 +40,7 @@
 
                     <TreeView Grid.Column="1">
                         <TreeViewItem Header="常用" Name="setting1" FontSize="14"/>
+                        <TreeViewItem Header="插件列表" Name="extensionList" FontSize="14"/>
                     </TreeView>
                     <Border Grid.Column="3" BorderBrush="#FF828790" BorderThickness="1,1,1,1" UseLayoutRounding="True">
                         <Grid>
@@ -69,9 +71,46 @@
                                 </Grid.RowDefinitions>
 
                                 <StackPanel Grid.Column="1" Grid.Row="1">
-                                    <CheckBox>
-                                        <TextBlock Text="是否XXXXX"/>
+                                    <CheckBox x:Name="isUseExtension">
+                                        <TextBlock Text="是否启用插件自动生成Tag"/>
                                     </CheckBox>
+                                </StackPanel>
+                            </Grid>
+                            <Grid>
+                                <Grid.Visibility>
+                                    <Binding ElementName="extensionList" Path="IsSelected">
+                                        <Binding.Converter>
+                                            <valueConverter:SettingsVisibilityValueConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </Grid.Visibility>
+                                <Grid.ColumnDefinitions>
+                                    <!--空白-->
+                                    <ColumnDefinition Width="5"/>
+                                    <!--Content-->
+                                    <ColumnDefinition Width="*"/>
+                                    <!--空白-->
+                                    <ColumnDefinition Width="5"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <!--空白-->
+                                    <RowDefinition Height="5"/>
+                                    <!--Content-->
+                                    <RowDefinition Height="*"/>
+                                    <!--空白-->
+                                    <RowDefinition Height="5"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Grid.Column="1" Grid.Row="1">
+                                    <Label>插件列表：</Label>
+                                    <ListView x:Name="extensionListView">
+                                        <ListView.View>
+                                            <GridView>
+                                                <GridViewColumn Header="插件名称" DisplayMemberBinding="{Binding Path=Name}"/>
+                                                <GridViewColumn Header="可处理文件格式" DisplayMemberBinding="{Binding Path=Format}"/>
+                                            </GridView>
+                                        </ListView.View>
+                                    </ListView>
                                 </StackPanel>
                             </Grid>
                         </Grid>

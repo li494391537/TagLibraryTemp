@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Lirui.TagLibray.ExtensionCommon;
 
 namespace Lirui.TagLibray.Extension {
-    [ExtensionInfo(new string[] { "mp3", "mp4", "mp5" }, Author = "lirui", Version = "1.0.0.0")]
+    [ExtensionInfo(new string[] { "mp3" }, Author = "lirui", Version = "1.0.0.0")]
     public class Mp3 : AbstractExtension {
 
         public Mp3(string filename) : base(filename) { }

@@ -259,4 +259,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.108.0\build\net46\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.108.0\build\net46\System.Data.SQLite.Core.targets'))" />
   </Target>
+  <PropertyGroup>
+    <PreBuildEvent>cmd /C "D:\Project\cloc-1.76.exe $(SolutionDir) --include-lang=XAML,C#"</PreBuildEvent>
+  </PropertyGroup>
 </Project>

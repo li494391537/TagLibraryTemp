@@ -42,6 +42,10 @@ namespace TagLibrary.Windows {
             fileName.Text = "";
             openFileDialog.FileNames.ToList().ForEach(x => fileName.Text += "\"" + System.IO.Path.GetFileName(x) + "\" ");
             FileNames = openFileDialog.FileNames;
+            //使用插件自动生成Tag
+            if (Properties.Settings.Default.isUseExtension) {
+
+            }
         }
 
         private void SelectTag_Click(object sender, RoutedEventArgs e) {

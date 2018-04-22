@@ -6,6 +6,7 @@ using System.IO;
 using Lirui.TagLibray.ExtensionCommon;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace TagLibrary.Utils {
     class ExtensionUtil {
@@ -19,6 +20,15 @@ namespace TagLibrary.Utils {
 
         private static void LoadExtension() {
 
+            Func<byte[], bool> publicKeyTokenTest = (buffer) => {
+                var str = new StringBuilder();
+                foreach (var b in buffer) {
+                    str.Append($"{b:x2}");
+                }
+                if (str.ToString().Equals("0ff26afdf715c0d1")) return true;
+                return false;
+            };
+
             var dir = Directory.CreateDirectory(Environment.CurrentDirectory + "\\Extensions");
             Assemblies =
                 dir.EnumerateFiles()
@@ -26,7 +36,8 @@ namespace TagLibrary.Utils {
                 .Select(item => item.FullName)
                 .Select(item => { try { return Assembly.LoadFile(item); } catch { return null; } })
                 .Where(item => item != null)
-                .Where(item => Regex.IsMatch(item.FullName, "PublicKeyToken=0ff26afdf715c0d1", RegexOptions.IgnoreCase))
+                .Where(item => publicKeyTokenTest(item.GetName().GetPublicKeyToken()))
+                //.Where(item => Regex.IsMatch(item.FullName, "PublicKeyToken=0ff26afdf715c0d1", RegexOptions.IgnoreCase))
                 .ToDictionary(item => item, item => new List<string>());
 
             Assemblies
