@@ -6,6 +6,11 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionCommon", "ExtensionCommon\ExtensionCommon.csproj", "{987E0F54-473F-4405-B65F-A4A25CBD03D7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TagLibrary", "TagLibrary\TagLibrary.csproj", "{E2C5E6BB-214D-4F7C-8D9F-4DC4E7B53CB4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{18622A01-D6F2-444B-9700-8FE9328398FB} = {18622A01-D6F2-444B-9700-8FE9328398FB}
+		{F176AE4B-F35A-4735-98B6-E4E2A46F5AC9} = {F176AE4B-F35A-4735-98B6-E4E2A46F5AC9}
+		{98AE1E50-3C4D-49B4-9D95-8292A215A154} = {98AE1E50-3C4D-49B4-9D95-8292A215A154}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{7919324A-072A-45F9-AD5C-4251D45C1536}"
 EndProject
@@ -14,6 +19,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extension.png", "Extension.png\Extension.png.csproj", "{18622A01-D6F2-444B-9700-8FE9328398FB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extension.mp4", "Extension.mp4\Extension.mp4.csproj", "{98AE1E50-3C4D-49B4-9D95-8292A215A154}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Extension.mp3.Tests", "Extension.mp3.Tests\Extension.mp3.Tests.csproj", "{124F2131-F299-4941-93E1-064F637A3CCD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -107,6 +114,22 @@ Global
 		{98AE1E50-3C4D-49B4-9D95-8292A215A154}.Release|x64.Build.0 = Release|Any CPU
 		{98AE1E50-3C4D-49B4-9D95-8292A215A154}.Release|x86.ActiveCfg = Release|Any CPU
 		{98AE1E50-3C4D-49B4-9D95-8292A215A154}.Release|x86.Build.0 = Release|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Debug|ARM.Build.0 = Debug|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Debug|x64.Build.0 = Debug|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Debug|x86.Build.0 = Debug|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Release|ARM.ActiveCfg = Release|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Release|ARM.Build.0 = Release|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Release|x64.ActiveCfg = Release|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Release|x64.Build.0 = Release|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Release|x86.ActiveCfg = Release|Any CPU
+		{124F2131-F299-4941-93E1-064F637A3CCD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

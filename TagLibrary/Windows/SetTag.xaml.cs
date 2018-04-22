@@ -1,17 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using TagLibrary.Models;
+using TagLibrary.UserControls;
 
 namespace TagLibrary.Windows {
     /// <summary>
@@ -19,7 +11,8 @@ namespace TagLibrary.Windows {
     /// </summary>
     public partial class SetTag : Window {
         private List<TagInfo> tags = new List<TagInfo>();
-        public event Action<object, TagInfo> AddingTag;
+        public event EventHandler<AddingTagEventArgs> AddingTag;
+        public bool IsOK { get; private set; } = false;
         public List<TagInfo> Tags {
             set {
                 tags = value;
@@ -31,6 +24,7 @@ namespace TagLibrary.Windows {
 
         private List<TagInfo> selectedTags = new List<TagInfo>();
         public List<TagInfo> SelectedTags {
+            get => selectedTags;
             set {
                 selectedTags = value;
                 if (tagSelectedTreeView != null) {
@@ -57,14 +51,14 @@ namespace TagLibrary.Windows {
         private void SelectTag_Click(object sender, RoutedEventArgs e) {
             var selectTag = tagTreeView.SelectedTag;
             var selectedTag = tagSelectedTreeView.Tags;
-            tagSelectedTreeView.AddTag(selectTag.Except(selectedTag).ToList());
+            tagSelectedTreeView.AddTag(selectTag.Except(selectedTag).ToArray());
             tagSelectedTreeView.ExpandAll();
         }
 
         private void CancelSelectTag_Click(object sender, RoutedEventArgs e) {
             var tags = tagSelectedTreeView.SelectedTag;
-            tagTreeView.RemoveSelectedTag(tags);
-            tagSelectedTreeView.RemoveTag(tags, true);
+            tagTreeView.RemoveSelectedTag(tags.ToArray());
+            tagSelectedTreeView.RemoveTag(tags.ToArray(), true);
         }
 
         private void AddTag_Click(object sender, RoutedEventArgs e) {
@@ -78,10 +72,13 @@ namespace TagLibrary.Windows {
                     Name = addTagWindow.TagName,
                     Group = addTagWindow.TagGroup
                 };
+                AddingTag?.Invoke(this, new AddingTagEventArgs(tagInfo));
             }
         }
 
         private void ButtonOK_Click(object sender, RoutedEventArgs e) {
+            IsOK = true;
+            selectedTags = tagSelectedTreeView.Tags;
             Close();
         }
 
@@ -94,8 +91,12 @@ namespace TagLibrary.Windows {
             fileName.Text = File.Name;
         }
 
-        private void TagTreeView_AddingTag(object sender, TagInfo tagInfo) {
-            AddingTag?.Invoke(this, tagInfo);
+        private void TagTreeView_AddingTag(object sender, AddingTagEventArgs e) {
+            AddingTag?.Invoke(sender, e);
+        }
+
+        public void AddTag(TagInfo tagInfo) {
+            tagTreeView.AddTag(new TagInfo[] { tagInfo });
         }
     }
 }

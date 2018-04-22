@@ -75,8 +75,9 @@
                 <ListView Name="fileList" BorderBrush="#FF828790" SelectionChanged="FileList_SelectionChanged" ItemsSource="{Binding}">
                     <ListView.ContextMenu>
                         <ContextMenu Name="fileListContextMenu">
-                            <MenuItem Header="复制到..."/>
-                            <MenuItem Header="剪切到..."/>
+                            <MenuItem Header="打开" Click="FileList_ContextMenu_Open_Click"/>
+                            <MenuItem Header="复制到..." Click="FileList_ContextMenu_CopyTo_Click"/>
+                            <MenuItem Header="删除" Click="FileList_ContextMenu_Delete_Click"/>
                             <Separator />
                             <MenuItem Header="设置Tag" Click="FileList_ContextMenu_SetTag_Click"/>
                             <Separator />
@@ -109,8 +110,8 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <RichTextBox Grid.Row="0" Name="test1" BorderBrush="#FF828790"></RichTextBox>
-                <RichTextBox Grid.Row="1" Name="test2" BorderBrush="#FF828790"></RichTextBox>
+                <TextBlock Grid.Row="0" Name="test1" />
+                <TextBlock Grid.Row="1" Name="test2" />
             </Grid>
         </Grid>
 

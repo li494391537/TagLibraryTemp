@@ -29,6 +29,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>lirui.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -49,5 +55,14 @@
       <Name>ExtensionCommon</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="lirui.snk" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir "$(SolutionDir)\TagLibrary\bin\Debug\Extensions"
+copy "$(TargetPath)" "$(SolutionDir)\TagLibrary\bin\Debug\Extensions"
+mkdir "$(SolutionDir)\TagLibrary\bin\Release\Extensions"
+copy "$(TargetPath)" "$(SolutionDir)\TagLibrary\bin\Release\Extensions"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

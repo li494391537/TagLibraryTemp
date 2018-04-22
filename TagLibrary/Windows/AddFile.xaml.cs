@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using TagLibrary.Models;
+using TagLibrary.UserControls;
 
 namespace TagLibrary.Windows {
     /// <summary>
@@ -10,8 +11,8 @@ namespace TagLibrary.Windows {
     /// </summary>
     public partial class AddFile : Window {
 
-        public event Action<object, TagInfo> AddingTag;
-        
+        public event EventHandler<AddingTagEventArgs> AddingTag;
+
         private List<TagInfo> tags = new List<TagInfo>();
         public List<TagInfo> Tags {
             get => tags;
@@ -46,24 +47,28 @@ namespace TagLibrary.Windows {
         private void SelectTag_Click(object sender, RoutedEventArgs e) {
             var selectTag = tagTreeView.SelectedTag;
             var selectedTag = tagSelectedTreeView.Tags;
-            tagSelectedTreeView.AddTag(selectTag.Except(selectedTag).ToList());
+            tagSelectedTreeView.AddTag(selectTag.Except(selectedTag).ToArray());
             tagSelectedTreeView.ExpandAll();
         }
 
         private void CancelSelectTag_Click(object sender, RoutedEventArgs e) {
             var tags = tagSelectedTreeView.SelectedTag;
-            tagTreeView.RemoveSelectedTag(tags);
-            tagSelectedTreeView.RemoveTag(tags, true);
+            tagTreeView.RemoveSelectedTag(tags.ToArray());
+            tagSelectedTreeView.RemoveTag(tags.ToArray(), true);
         }
 
         private void AddTag_Click(object sender, RoutedEventArgs e) {
-            var addTagWindow = new AddTag();
+            var addTagWindow = new AddTag() {
+                Owner = this,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner
+            };
             addTagWindow.ShowDialog();
             if (addTagWindow.IsOK) {
                 var tagInfo = new TagInfo() {
                     Name = addTagWindow.TagName,
                     Group = addTagWindow.TagGroup
                 };
+                AddingTag?.Invoke(this, new AddingTagEventArgs(tagInfo));
             }
         }
 
@@ -81,8 +86,13 @@ namespace TagLibrary.Windows {
             Close();
         }
 
-        private void TagTreeView_AddingTag(object arg1, TagInfo arg2) {
-            AddingTag?.Invoke(arg1, arg2);
+        private void TagTreeView_AddingTag(object sender, AddingTagEventArgs e) {
+            AddingTag?.Invoke(sender, e);
+        }
+
+
+        public void AddTag(TagInfo tagInfo) {
+            tagTreeView.AddTag(new TagInfo[] { tagInfo });
         }
     }
 }

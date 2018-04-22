@@ -15,11 +15,12 @@ namespace TagLibrary.UserControls {
     public partial class TagTreeView : UserControl {
 
         #region Event
-        public event Action<List<TagInfo>> TagCheckChanged;
-        public event Action<object, TagInfo> AddingTag;
+        public event EventHandler<TagCheckChangedEventArgs> TagCheckChanged;
+        public event EventHandler<AddingTagEventArgs> AddingTag;
         #endregion
 
         #region Property
+
         public bool HasContextMenu { get; set; } = true;
 
         public List<TagInfo> Tags {
@@ -74,6 +75,7 @@ namespace TagLibrary.UserControls {
                     .ForEach(x => x.IsChecked = true);
             }
         }
+
         #endregion
 
         /// <summary>
@@ -98,10 +100,10 @@ namespace TagLibrary.UserControls {
             };
             addTagWindow.ShowDialog();
             if (addTagWindow.IsOK) {
-                AddingTag?.Invoke(this, new TagInfo {
+                AddingTag?.Invoke(this, new AddingTagEventArgs(new TagInfo {
                     Group = addTagWindow.TagGroup,
                     Name = addTagWindow.TagName
-                });
+                }));
             }
         }
 
@@ -157,7 +159,7 @@ namespace TagLibrary.UserControls {
                 .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
                 .ToList()
                 .ForEach(x => x.IsChecked = !x.IsChecked);
-        
+
 
         #endregion
 
@@ -172,9 +174,8 @@ namespace TagLibrary.UserControls {
             var selectTag = (tagTree.ItemsSource as BindingList<TreeViewItem>)
                             .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
                             .Where(x => x.IsChecked == true)
-                            .Select(x => x.DataContext as TagInfo)
-                            .ToList();
-            TagCheckChanged?.Invoke(selectTag);
+                            .Select(x => x.DataContext as TagInfo);
+            TagCheckChanged?.Invoke(this, new TagCheckChangedEventArgs(selectTag.ToArray()));
         }
 
         /// <summary>
@@ -213,7 +214,7 @@ namespace TagLibrary.UserControls {
         /// 向TreeView中添加Tags，PS：不会更改Tags，Tags只用来初始化TreeView，不会监测其变化
         /// </summary>
         /// <param name="tagInfos"></param>
-        public void AddTag(List<TagInfo> tagInfos) {
+        public void AddTag(TagInfo[] tagInfos) {
             //唯一性约束检查
             //foreach (var tagInfo in tagInfos.Join(tags, x => new { x.Name, x.Group }, y => new { y.Name, y.Group }, (x, y) => x)) {
             //    tagInfos.Remove(tagInfo);
@@ -245,7 +246,7 @@ namespace TagLibrary.UserControls {
         /// </summary>
         /// <param name="tagIds"></param>
         /// <param name="isRemoveGroup"></param>
-        public void RemoveTag(List<TagInfo> tagInfos, bool isRemoveGroup = false) {
+        public void RemoveTag(TagInfo[] tagInfos, bool isRemoveGroup = false) {
             (tagTree.ItemsSource as BindingList<TreeViewItem>)
                 .SelectMany(x => x.ItemsSource as BindingList<CheckBox>, (x, y) => new { group = x, tag = y })
                 .Join(tagInfos, x => x.tag.DataContext as TagInfo, y => y, (x, y) => x)
@@ -283,8 +284,8 @@ namespace TagLibrary.UserControls {
                       .First();
             tagInfo.Name = tagInfo.Name ?? tag.Name;
             tagInfo.Group = tagInfo.Group ?? tag.Group;
-            RemoveTag(new List<TagInfo>() { tagInfo });
-            AddTag(new List<TagInfo>() { tagInfo });
+            RemoveTag(new TagInfo[] { tagInfo });
+            AddTag(new TagInfo[] { tagInfo });
         }
 
         //public void AddSelectedTag(List<int> tagIds) {
@@ -299,7 +300,7 @@ namespace TagLibrary.UserControls {
         //    }
         //}
 
-        public void AddSelectedTag(List<TagInfo> tagInfos) {
+        public void AddSelectedTag(TagInfo[] tagInfos) {
             (tagTree.ItemsSource as BindingList<TreeViewItem>)
                 .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
                 .Join(tagInfos, x => x.DataContext as TagInfo, y => y, (x, y) => x)
@@ -307,7 +308,7 @@ namespace TagLibrary.UserControls {
                 .ForEach(x => x.IsChecked = true);
         }
 
-        public void RemoveSelectedTag(List<TagInfo> tagInfos) {
+        public void RemoveSelectedTag(TagInfo[] tagInfos) {
             (tagTree.ItemsSource as BindingList<TreeViewItem>)
                 .SelectMany(x => x.ItemsSource as BindingList<CheckBox>)
                 .Join(tagInfos, x => x.DataContext as TagInfo, y => y, (x, y) => x)
@@ -316,5 +317,19 @@ namespace TagLibrary.UserControls {
         }
         #endregion
 
+    }
+
+    public class TagCheckChangedEventArgs : EventArgs {
+        public TagInfo[] Tags { get; }
+        public TagCheckChangedEventArgs(TagInfo[] tags) {
+            Tags = tags;
+        }
+    }
+
+    public class AddingTagEventArgs: EventArgs {
+        public TagInfo Tag { get; }
+        public AddingTagEventArgs(TagInfo tag) {
+            Tag = tag;
+        }
     }
 }

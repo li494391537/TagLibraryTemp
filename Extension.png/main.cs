@@ -6,8 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Extension.png {
+    [ExtensionInfo(new string[] { "png" }, Author = "lirui", Version = "1.0.0.0")]
     public class Png : AbstractExtension {
-        public override Dictionary<string, string> GetTags() {
+        public Png(string filename) : base(filename) { }
+        public override KeyValuePair<string, string>[] GetTags() {
             throw new NotImplementedException();
         }
     }

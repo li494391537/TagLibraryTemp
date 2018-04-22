@@ -2,9 +2,10 @@
 using Lirui.TagLibray.ExtensionCommon;
 
 namespace Lirui.TagLibray.Extension {
-    [ExtensionInfo(new string[] { "mp3" }, Author = "lirui", Version = "1.0.0.0")]
+    [ExtensionInfo(new string[] { "mp4" }, Author = "lirui", Version = "1.0.0.0")]
     public class Mp4 : AbstractExtension {
-        public override Dictionary<string, string> GetTags() {
+        public Mp4(string filename) : base(filename) { }
+        public override KeyValuePair<string, string>[] GetTags() {
             throw new System.NotImplementedException();
         }
     }

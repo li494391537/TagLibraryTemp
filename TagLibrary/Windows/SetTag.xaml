@@ -47,7 +47,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <Label Grid.Column="0" FontSize="14">文件名:</Label>
-                <TextBox Name="fileName" Grid.Column="2" MaxLines="1" FontSize="14" IsEnabled="False"/>
+                <TextBox Name="fileName" Grid.Column="2" MaxLines="1" FontSize="14" IsReadOnly="true"/>
             </Grid>
             <!--标签设置-->
             <Grid Grid.Row="2">
